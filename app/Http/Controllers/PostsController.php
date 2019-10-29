@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
-use App\Category;
+
 use Illuminate\Http\Request;
-use App\Http\Requests\Categories\CreateCategoryRequest;
+use App\Http\Requests\Categories\CreatePostsRequest;
 use App\Http\Requests\Categories\UpdateCategoriesRequest;
-class CategoriesController extends Controller
+
+class PostsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -13,8 +15,9 @@ class CategoriesController extends Controller
      */
     public function index()
     {
-        return view('categories.index')->with('categories', Category::all());
+        return view('posts.index');
     }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -22,22 +25,37 @@ class CategoriesController extends Controller
      */
     public function create()
     {
-        return view('categories.create');
+        return view('posts.create');
     }
+
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(CreateCategoryRequest $request)
+    public function store(CreatePostRequest $request)
     {
-        Category::create([
-          'name' => $request->name
+        $image = $request->image->store('posts');
+
+        Post::create([
+          'title' => $request->title,
+          'description' => $request->description,
+          'content' => $request->content,
+          'image' => $image,
+          'published_at' => $request->published_at,
+          'category_id' => $request->category,
+          'user_id' => auth()->user()->id
         ]);
-        session()->flash('success', 'Category created successfully.');
-        return redirect(route('categories.index'));
+
+        if ($request->tags) {
+            $post->tags()->attach($request->tags);
+        }
+
+        session()->flash('success', 'Post created successfully.');
+        return redirect(route('posts.index'));
     }
+
     /**
      * Display the specified resource.
      *
@@ -48,16 +66,18 @@ class CategoriesController extends Controller
     {
         //
     }
+
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Category $category)
+    public function edit($id)
     {
-        return view('categories.create')->with('category', $category);
+        //
     }
+
     /**
      * Update the specified resource in storage.
      *
@@ -65,29 +85,19 @@ class CategoriesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCategoriesRequest $request, Category $category)
+    public function update(Request $request, $id)
     {
-        $category->update([
-          'name' => $request->name
-        ]);
-        session()->flash('success', 'Category updated successfully.');
-        return redirect(route('categories.index'));
+        //
     }
+
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy($id)
     {
-        // if ($category->posts->count() > 0) {
-        //   session()->flash('error', 'Category cannot be deleted because it has some posts.');
-        //   return redirect()->back();
-        // }
-
-        $category->delete();
-        session()->flash('success', 'Category deleted successfully.');
-        return redirect(route('categories.index'));
+        //
     }
 }
